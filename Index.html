@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>芝麻關門</title>
+  <style>
+    :root {
+      color-scheme: light !important;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #E8552D !important;
+      color: #333333 !important;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.4) !important;
+      border-radius: 20px;
+      padding: 30px 25px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      text-align: center;
+    }
+
+    .title {
+      color: #ffffff !important;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .pin-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .pin-box {
+      width: 65px;
+      height: 75px;
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      text-transform: uppercase;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 14px;
+      background-color: #ffffff !important;
+      color: #2C2C2C !important;
+      outline: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.1s ease;
+      will-change: transform;
+    }
+
+    .pin-box:focus {
+      border-color: #ffffff !important;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+    }
+
+    .pin-box.pop {
+      transform: scale(1.08);
+    }
+
+    .tab-group {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #ffffff !important;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .form-panel {
+      display: none;
+    }
+
+    .form-panel.active {
+      display: block;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 50px;
+      border-radius: 12px;
+      border: none;
+      padding: 0 16px;
+      font-size: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+      background-color: #ffffff !important;
+      color: #2C2C2C !important;
+      outline: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 50px;
+      border-radius: 12px;
+      border: none;
+      background-color: #ffffff !important;
+      color: #E8552D !important;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    .result-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      color: #2C2C2C !important;
+      font-size: 15px;
+      font-weight: bold;
+      line-height: 1.6;
+      display: none;
+      word-break: break-all;
+      white-space: pre-line;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(232, 85, 45, 0.3);
+      border-radius: 50%;
+      border-top-color: #E8552D;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 關卡 1：芝麻關門 -->
+  <div class="container" id="lock-screen">
+    <div class="title">芝麻關門</div>
+    
+    <div class="pin-container">
+      <input type="text" maxlength="1" class="pin-box" id="pin1" autocomplete="off" inputmode="url" pattern="[a-zA-Z0-9]*">
+      <input type="text" maxlength="1" class="pin-box" id="pin2" autocomplete="off" inputmode="url" pattern="[a-zA-Z0-9]*">
+      <input type="text" maxlength="1" class="pin-box" id="pin3" autocomplete="off" inputmode="url" pattern="[a-zA-Z0-9]*">
+      <input type="text" maxlength="1" class="pin-box" id="pin4" autocomplete="off" inputmode="url" pattern="[a-zA-Z0-9]*">
+    </div>
+
+    <button class="submit-btn" id="btn-unlock" onclick="verifyPin()">進入系統</button>
+    <div class="result-box" id="pinErrorBox"></div>
+  </div>
+
+  <!-- 關卡 2：鑰匙管理系統 -->
+  <div class="container" id="main-screen" style="display: none;">
+    <div class="title">鑰匙管理系統</div>
+
+    <div class="tab-group">
+      <button class="tab-btn active" id="tab-take" onclick="switchTab('take')">拿鑰匙</button>
+      <button class="tab-btn" id="tab-search" onclick="switchTab('search')">查鑰匙</button>
+    </div>
+
+    <div class="form-panel active" id="panel-take">
+      <input type="text" id="nameInput" class="input-field" placeholder="請輸入姓名" autocomplete="off">
+      <button class="submit-btn" id="btn-record" onclick="handleRecord()">送出登記</button>
+    </div>
+
+    <div class="form-panel" id="panel-search">
+      <input type="date" id="dateInput" class="input-field">
+      <button class="submit-btn" id="btn-search" onclick="handleSearch()">開始查詢</button>
+    </div>
+
+    <div class="result-box" id="resultBox"></div>
+  </div>
+
+  <script>
+    // ⚠️【請將此處替換為您 GAS 部署的 API 網址】
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzSJkSQR9morGHl4thnzOHcAcd6QIuCpgksBWt556Vbt31ovF5mZFjeiEH6CGusCz73sQ/exec";
+
+    let boxes = [];
+
+    window.onload = () => {
+      document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+      boxes = [
+        document.getElementById('pin1'),
+        document.getElementById('pin2'),
+        document.getElementById('pin3'),
+        document.getElementById('pin4')
+      ];
+      setupPinBoxes();
+      boxes[0].focus();
+    };
+
+    // 通用非同步請求函式
+    async function callGasApi(payload) {
+      const response = await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      return await response.json();
+    }
+
+    function setupPinBoxes() {
+      boxes.forEach((box, index) => {
+        box.addEventListener('input', () => {
+          box.value = box.value.replace(/[^a-zA-Z0-9]/g, '');
+
+          if (box.value.length >= 1) {
+            box.classList.add('pop');
+            setTimeout(() => box.classList.remove('pop'), 100);
+
+            if (index < boxes.length - 1) {
+              boxes[index + 1].focus();
+            } else {
+              verifyPin();
+            }
+          }
+        });
+
+        box.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !box.value && index > 0) {
+            boxes[index - 1].focus();
+          }
+        });
+      });
+    }
+
+    async function verifyPin() {
+      const inputPin = boxes.map(b => b.value).join('').toUpperCase();
+      const pinErrorBox = document.getElementById('pinErrorBox');
+
+      if (inputPin.length < 4) {
+        pinErrorBox.style.display = 'block';
+        pinErrorBox.innerText = '請完整輸入 4 位密碼！';
+        return;
+      }
+
+      showLoading('btn-unlock');
+      pinErrorBox.style.display = 'none';
+
+      try {
+        const res = await callGasApi({ action: 'checkPin', pin: inputPin });
+        hideLoading('btn-unlock', '進入系統');
+        if (res.success) {
+          showMainScreen();
+        } else {
+          pinErrorBox.style.display = 'block';
+          pinErrorBox.innerText = res.message;
+          boxes.forEach(b => b.value = '');
+          boxes[0].focus();
+        }
+      } catch (err) {
+        hideLoading('btn-unlock', '進入系統');
+        pinErrorBox.style.display = 'block';
+        pinErrorBox.innerText = '連線驗證失敗，請稍後再試。';
+      }
+    }
+
+    function showMainScreen() {
+      document.getElementById('lock-screen').style.display = 'none';
+      document.getElementById('main-screen').style.display = 'block';
+      
+      setTimeout(() => {
+        document.getElementById('nameInput').focus();
+      }, 50);
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.form-panel').forEach(panel => panel.classList.remove('active'));
+      document.getElementById('resultBox').style.display = 'none';
+
+      if (tab === 'take') {
+        document.getElementById('tab-take').classList.add('active');
+        document.getElementById('panel-take').classList.add('active');
+        setTimeout(() => {
+          document.getElementById('nameInput').focus();
+        }, 50);
+      } else {
+        document.getElementById('tab-search').classList.add('active');
+        document.getElementById('panel-search').classList.add('active');
+      }
+    }
+
+    function showLoading(btnId) {
+      const btn = document.getElementById(btnId);
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading-spinner"></div>';
+    }
+
+    function hideLoading(btnId, originalText) {
+      const btn = document.getElementById(btnId);
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+
+    async function handleRecord() {
+      const nameInput = document.getElementById('nameInput');
+      const name = nameInput.value.trim();
+      const resultBox = document.getElementById('resultBox');
+
+      if (!name) {
+        resultBox.style.display = 'block';
+        resultBox.innerText = '請先輸入姓名！';
+        nameInput.focus();
+        return;
+      }
+
+      showLoading('btn-record');
+      resultBox.style.display = 'none';
+
+      try {
+        const res = await callGasApi({ action: 'recordKey', name: name });
+        hideLoading('btn-record', '送出登記');
+        resultBox.style.display = 'block';
+        resultBox.innerText = res.message;
+        if (res.success) {
+          nameInput.value = '';
+          nameInput.focus();
+        }
+      } catch (err) {
+        hideLoading('btn-record', '送出登記');
+        resultBox.style.display = 'block';
+        resultBox.innerText = '連線失敗，請稍後再試。';
+      }
+    }
+
+    async function handleSearch() {
+      const date = document.getElementById('dateInput').value;
+      const resultBox = document.getElementById('resultBox');
+
+      if (!date) {
+        resultBox.style.display = 'block';
+        resultBox.innerText = '請先選擇日期！';
+        return;
+      }
+
+      showLoading('btn-search');
+      resultBox.style.display = 'none';
+
+      try {
+        const res = await callGasApi({ action: 'searchKey', date: date });
+        hideLoading('btn-search', '開始查詢');
+        resultBox.style.display = 'block';
+        if (res.success) {
+          resultBox.innerText = `${res.date} 最後領取者記錄：\n姓名：${res.lastPerson}\n時間：${res.lastTime}`;
+        } else {
+          resultBox.innerText = res.message;
+        }
+      } catch (err) {
+        hideLoading('btn-search', '開始查詢');
+        resultBox.style.display = 'block';
+        resultBox.innerText = '查詢失敗，請稍後再試。';
+      }
+    }
+  </script>
+</body>
+</html>
